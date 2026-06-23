@@ -77,7 +77,7 @@ class UpdateUserRoleSerializer(serializers.ModelSerializer):
 class ComplaintStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Complaint
-        fields = ['status']
+        fields = ['status', 'priority']
 
     
 class CommentSerializer(serializers.ModelSerializer):

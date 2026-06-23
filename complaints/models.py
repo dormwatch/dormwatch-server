@@ -8,7 +8,11 @@ COMPLAINT_STATUS = [
     ('denied', 'Відхилено'),
     ('resolved', 'Вирішено')
 ]
-
+COMPLAINT_PRIORITY = [
+    ('low', 'Низький'),
+    ('medium', 'Середній'),
+    ('high', 'Високий')
+]
 
 class Role(models.Model):
     role_id = models.AutoField(primary_key=True)
@@ -79,7 +83,7 @@ class Complaint(models.Model):
     photo_url = models.ImageField(upload_to='complaint_photos/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(ComplaintCategory, on_delete=models.CASCADE)
-    priority = models.CharField(max_length=50, blank=True, null=True)
+    priority = models.CharField(max_length=50, choices=COMPLAINT_PRIORITY, default='medium')
     
 
     def __str__(self):
