@@ -78,7 +78,7 @@ class RegisterView(APIView):
         with transaction.atomic():
             user = serializer.save()
 
-            role = Role.objects.filter(role_name__iexact='student').first()
+            role, _ = Role.objects.get_or_create(role_name='student')
             place = serializer.validated_data.get('place_id')
 
             UserProfile.objects.create(

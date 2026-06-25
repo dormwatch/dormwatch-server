@@ -400,6 +400,8 @@ class TicketView(APIView):
         if worker_id:
             try:
                 target_worker=UserProfile.objects.get(user_id=worker_id)
+                if not target_worker.role or target_worker.role.role_name.lower() != 'worker':
+                    return Response({'error': 'User is not a worker'}, status=status.HTTP_400_BAD_REQUEST)
             except UserProfile.DoesNotExist:
                 return Response({'error': 'Worker not found'}, status=status.HTTP_404_NOT_FOUND)
             except Exception as e:
@@ -444,6 +446,8 @@ class TicketDetailView(APIView):
             else:
                 try:
                     target_worker = UserProfile.objects.get(user_id=worker_id)
+                    if not target_worker.role or target_worker.role.role_name.lower() != 'worker':
+                        return Response({'error': 'User is not a worker'}, status=status.HTTP_400_BAD_REQUEST)
                     ticket.user = target_worker
                 except UserProfile.DoesNotExist:
                     return Response({'error': 'Worker not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -468,6 +472,6 @@ class EmployeeListView(APIView):
             return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
             
         # Return all users who could be assigned as workers
-        employees = UserProfile.objects.all()
+        employees = UserProfile.objects.filter(role__role_name__iexact='worker')
         serializer = UserSerializer(employees, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
