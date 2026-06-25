@@ -81,11 +81,17 @@ class UserComplaintView(APIView):
         if not user_profile:
             return Response({'error': 'Unauthorized'}, status=status.HTTP_401_UNAUTHORIZED)
         place_id = request.data.get('place_id')
+        place_name = request.data.get('place_name')
         category_name = request.data.get('category')
         category_obj = None
         target_place = None
 
-        if place_id:
+        if place_name and user_profile.place and user_profile.place.building:
+            target_place, _ = Place.objects.get_or_create(
+                building=user_profile.place.building,
+                place_name=place_name
+            )
+        elif place_id:
             try:
                 target_place = Place.objects.get(place_id=place_id)
             except Place.DoesNotExist:
