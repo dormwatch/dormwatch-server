@@ -21,5 +21,5 @@ def rename_categories(apps, schema_editor):
             old.save()
 
 class Migration(migrations.Migration):
-    dependencies = [('complaints', '0007_place_unique_building_place_name')]
+    dependencies = [('complaints', '0008_notification')]
     operations = [migrations.RunPython(rename_categories, reverse_code=migrations.RunPython.noop)]
