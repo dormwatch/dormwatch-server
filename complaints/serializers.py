@@ -97,11 +97,12 @@ class UpdateUserRoleSerializer(serializers.ModelSerializer):
 
 
 class ComplaintStatusSerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(write_only=True, required=False)
-
+    # Admins may only change moderation fields (status/priority). Content
+    # (title/description/category/photo) is owner-only, edited via the
+    # /me/complaints/ endpoint — never through the admin status endpoint.
     class Meta:
         model = Complaint
-        fields = ['status', 'priority', 'title', 'description', 'category_name']
+        fields = ['status', 'priority']
 
     
 class CommentSerializer(serializers.ModelSerializer):

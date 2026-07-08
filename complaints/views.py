@@ -452,25 +452,12 @@ class AdminComplaintStatusView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        for field in ['status', 'priority', 'title', 'description']:
+        # Admins may only change moderation fields. Content (title, description,
+        # category, photo) is owner-only and edited via /me/complaints/ — any
+        # such fields in the request are intentionally ignored here.
+        for field in ['status', 'priority']:
             if field in serializer.validated_data:
                 setattr(complaint, field, serializer.validated_data[field])
-
-        category_name = request.data.get('category_name')
-        if category_name:
-            try:
-                category_obj = ComplaintCategory.objects.get(name=category_name)
-            except ComplaintCategory.DoesNotExist:
-                return Response({'error': f'Category "{category_name}" not found'}, status=status.HTTP_400_BAD_REQUEST)
-            complaint.category = category_obj
-
-        photo_file = request.FILES.get('photo_url')
-        if photo_file:
-            if photo_file.size > 10 * 1024 * 1024:
-                return Response({'error': 'File size must be under 10MB'}, status=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE)
-            result = process_complaint_photo(photo_file)
-            complaint.photo_url = result['full']
-            complaint.thumbnail = result['thumbnail']
 
         complaint.save()
 
