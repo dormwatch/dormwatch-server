@@ -712,6 +712,30 @@ class EmployeeListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class UserTicketView(APIView):
+    '''Read-only: the tickets (work orders) opened for THIS resident's own
+    complaints. Residents never assign/schedule — that stays admin-only in
+    TicketView — but they can see who is handling their request and by when.'''
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user_profile = request.user.profile
+        except (UserProfile.DoesNotExist, AttributeError):
+            return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+        # select_related('user') avoids an N+1: TicketSerializer nests the
+        # assigned worker profile. order_by gives the client a deterministic
+        # order when a complaint has more than one ticket.
+        tickets = (
+            Ticket.objects
+            .filter(complaint__user=user_profile)
+            .select_related('user')
+            .order_by('ticket_id')
+        )
+        serializer = TicketSerializer(tickets, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class NotificationListView(APIView):
     permission_classes = [IsAuthenticated]
 
