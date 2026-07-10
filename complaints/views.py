@@ -157,7 +157,9 @@ class ComplaintView(APIView):
         
         complaints = Complaint.objects.all()
         if not is_admin:
-            complaints = complaints.filter(status='published')
+            # Public board shows both live and completed issues: 'published'
+            # (active) and 'resolved' (fixed). 'pending'/'denied' stay hidden.
+            complaints = complaints.filter(status__in=['published', 'resolved'])
         category_param = request.query_params.get('category')
         status_param = request.query_params.get('status')
         corps_param = request.query_params.get('corps')
@@ -188,7 +190,7 @@ class ComplaintDetailView(APIView):
         except Complaint.DoesNotExist:
             return Response({'error': 'Complaint not found'}, status=status.HTTP_404_NOT_FOUND)
             
-        if not is_admin and complaint.status != 'published' and complaint.user != user_profile:
+        if not is_admin and complaint.status not in ['published', 'resolved'] and complaint.user != user_profile:
             return Response({'error': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
         serializer = ComplaintSerializer(complaint)
         return Response(serializer.data, status=status.HTTP_200_OK)
